@@ -1,0 +1,49 @@
+html, body { margin: 0; height: 100%; overflow: hidden; background: #2b2f26; }
+body { font-family: Georgia, 'Times New Roman', serif; color: #3c3326; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+#gl, #ui { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+#gl { touch-action: none; cursor: crosshair; }
+#ui { pointer-events: none; }
+#nogl { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 2em; text-align: center; color: #f3ead6; font-size: 18px; font-style: italic; }
+
+/* paper notes: help and atlas */
+#help, #atlas { position: fixed; inset: 0; display: none; z-index: 5; }
+#help.open, #atlas.open { display: flex; }
+#help { align-items: center; justify-content: center; background: rgba(20, 24, 18, 0.35); }
+#help .note {
+  max-width: 560px; width: calc(100vw - 48px); max-height: calc(100vh - 60px); overflow: auto;
+  background: #f5eedd; border-radius: 6px; padding: 26px 30px 18px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  background-image: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.6), transparent 60%), radial-gradient(circle at 80% 90%, rgba(196, 170, 120, 0.18), transparent 55%);
+}
+#help h2 { margin: 0 0 12px; font-weight: normal; font-style: italic; font-size: 26px; color: #4a3c28; }
+#help dl { margin: 0; display: grid; grid-template-columns: 92px 1fr; gap: 7px 14px; font-size: 14.5px; line-height: 1.42; }
+#help dt { font-style: italic; color: #7a5c34; }
+#help dd { margin: 0; }
+#help .row, #atlas .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+#help button, #atlas button {
+  font: inherit; font-size: 14px; background: #ebe0c7; color: #4a3c28; border: 1px solid rgba(110, 85, 50, 0.3);
+  border-radius: 20px; padding: 6px 15px; cursor: pointer;
+}
+#help button:hover, #atlas button:hover { background: #f8eed6; }
+.credits { font-size: 12px; color: #8a7a62; margin: 14px 0 0; font-style: italic; }
+
+#atlas { overflow: auto; background: #e9dfc8; background-image: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.55), transparent 55%), radial-gradient(circle at 75% 85%, rgba(170, 140, 90, 0.2), transparent 60%); }
+#atlas .atlas-inner { width: min(1180px, calc(100vw - 40px)); margin: 0 auto; padding: 34px 0 40px; }
+#atlas header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid rgba(110, 85, 50, 0.25); padding-bottom: 12px; }
+#atlas h1 { margin: 0; font-weight: normal; font-style: italic; font-size: 34px; color: #4a3c28; }
+#atlas .actions { margin: 0; }
+#atlas .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 26px; margin-top: 26px; }
+#atlas .card { background: #f6efdf; border-radius: 4px; padding: 10px 10px 12px; box-shadow: 0 6px 18px rgba(60, 45, 20, 0.18); transform: rotate(-0.4deg); transition: transform 0.2s, box-shadow 0.2s; }
+#atlas .card:nth-child(2n) { transform: rotate(0.5deg); }
+#atlas .card:hover { transform: translateY(-3px) rotate(0deg); box-shadow: 0 12px 26px rgba(60, 45, 20, 0.25); }
+#atlas .card.current { outline: 2px solid rgba(214, 150, 70, 0.6); outline-offset: 3px; }
+#atlas .thumb { aspect-ratio: 16 / 10; border-radius: 2px; overflow: hidden; cursor: pointer; background: #d8ccb0; display: flex; align-items: center; justify-content: center; }
+#atlas .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#atlas .thumb .blank { width: 100%; height: 100%; background: linear-gradient(135deg, #b9c48f, #93a86f); }
+#atlas .thumb.new { background: transparent; border: 2px dashed rgba(110, 85, 50, 0.35); font-size: 54px; color: rgba(110, 85, 50, 0.55); }
+#atlas .card.new { cursor: pointer; background: rgba(246, 239, 223, 0.55); box-shadow: none; }
+#atlas .name { margin-top: 9px; font-style: italic; font-size: 18px; outline: none; border-radius: 3px; padding: 1px 3px; cursor: text; }
+#atlas .card.new .name { cursor: pointer; }
+#atlas .name:focus { background: #fffaf0; }
+#atlas .meta { font-size: 12.5px; color: #8a7a62; padding: 0 3px; }
+#atlas .btns { display: flex; gap: 8px; margin-top: 9px; }
+#atlas .btns button { font-size: 12.5px; padding: 4px 11px; }
