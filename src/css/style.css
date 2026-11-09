@@ -47,3 +47,6 @@ body { font-family: Georgia, 'Times New Roman', serif; color: #3c3326; -webkit-u
 #atlas .meta { font-size: 12.5px; color: #8a7a62; padding: 0 3px; }
 #atlas .btns { display: flex; gap: 8px; margin-top: 9px; }
 #atlas .btns button { font-size: 12.5px; padding: 4px 11px; }
+#atlas .btns button.armed { background: #c9573a; color: #fff8ef; border-color: #a5432b; }
+#atlas .linkbox { margin-top: 16px; display: flex; gap: 10px; align-items: center; font-size: 14px; font-style: italic; color: #6a5536; }
+#atlas .linkbox input { flex: 1; font: 13px Georgia, serif; padding: 6px 9px; border: 1px solid rgba(110, 85, 50, 0.35); border-radius: 6px; background: #fffaf0; color: #3c3326; }

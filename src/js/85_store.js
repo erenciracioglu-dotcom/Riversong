@@ -57,7 +57,9 @@ RS.store = (() => {
     const json = JSON.stringify(data);
     const z = await deflate(json);
     const code = z ? z.fmt + RS.util.bytesToB64url(z.bytes) : 'j' + RS.util.bytesToB64url(new TextEncoder().encode(json));
-    return location.href.split('#')[0] + '#v=' + code;
+    const here = location.href.split('#')[0];
+    const base = /^https?:/.test(location.protocol) && /github\.io$/.test(location.hostname) ? here : 'https://erenciracioglu-dotcom.github.io/Riversong/';
+    return base + '#v=' + code;
   }
   async function fromHash() {
     const m = /[#&]v=([A-Za-z0-9_-]+)/.exec(location.hash || '');
@@ -127,7 +129,12 @@ RS.atlas = (() => {
     else if (act === 'new') { RS.app.newValley(); close(); }
     else if (act === 'open' && id) { if (!RS.app.valley || id !== RS.app.valley.id) RS.app.openById(id); close(); }
     else if (act === 'del' && id) {
-      if (!confirm(T.confirmDel)) return;
+      const btn = e.target.closest('[data-act]');
+      if (!btn.classList.contains('armed')) {
+        btn.classList.add('armed'); btn.textContent = T.confirmDel;
+        setTimeout(() => { if (btn.isConnected) { btn.classList.remove('armed'); btn.textContent = T.del; } }, 4000);
+        return;
+      }
       const wasCur = RS.app.valley && id === RS.app.valley.id;
       RS.store.remove(id);
       if (wasCur) { const rest = RS.store.index(); if (rest.length) RS.app.openById(rest[0].id, true); else RS.app.newValley(true); }
@@ -138,8 +145,22 @@ RS.atlas = (() => {
       const lan = v === RS.app.valley ? RS.app.lanternSnapshot() : (v.lanterns || []);
       const url = await RS.store.shareURL(v, lan);
       try { await navigator.clipboard.writeText(url); RS.ui.showToast(T.copied); }
-      catch (err) { prompt(T.copyFail, url); }
+      catch (err) { showLink(url); }
     }
+  }
+  // where the clipboard is refused: show the link to copy by hand
+  function showLink(url) {
+    const T = RS.i18n.t();
+    const inner = document.querySelector('#atlas .atlas-inner');
+    if (!inner) return;
+    let box = inner.querySelector('.linkbox');
+    if (!box) { box = document.createElement('div'); box.className = 'linkbox'; inner.insertBefore(box, inner.children[1]); }
+    box.innerHTML = '<span></span><input readonly>';
+    box.querySelector('span').textContent = T.copyFail;
+    const inp = box.querySelector('input');
+    inp.value = url;
+    inp.addEventListener('focus', () => inp.select());
+    inp.focus();
   }
   return { open, close, render };
 })();

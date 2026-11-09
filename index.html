@@ -1918,6 +1918,7 @@ RS.render = (() => {
   let draftMesh = null;
   const cam = { x: 1000, y: 625, zoom: 1, tx: 1000, ty: 625, tz: 1 };
   let valley = null;
+  let needHome = false;   // the page was laid out at zero size: frame the valley once it has a real size
 
   // ---------- GL helpers ----------
   function compile(type, src) {
@@ -2139,6 +2140,7 @@ RS.render = (() => {
     if (cssW * cssH * dpr * dpr > maxPx) dpr = Math.sqrt(maxPx / (cssW * cssH));
     const w = Math.round(cssW * dpr), h = Math.round(cssH * dpr);
     if (w === W && h === H && sceneFB) return;
+    if ((W <= 4 || H <= 4) && w > 4 && h > 4) needHome = true;
     W = w; H = h;
     canvas.width = W; canvas.height = H;
     freeFB(sceneFB); freeFB(landFB);
@@ -2168,6 +2170,8 @@ RS.render = (() => {
     cam.ty = U.clamp(cam.ty, M.WORLD.h / 2 - my, M.WORLD.h / 2 + my);
   }
   function updateCamera(dt) {
+    if (needHome && cssW() >= 60 && cssH() >= 60) { needHome = false; home(true); }
+    if (cam.tz < fitZoom() * 0.5) { cam.tz = cam.zoom = fitZoom(); }
     clampCam();
     const k = 1 - Math.exp(-dt * 14);
     cam.x += (cam.tx - cam.x) * k;
@@ -2192,6 +2196,7 @@ RS.render = (() => {
   }
   // frame what has been made so far (or the middle of the land when it is still empty)
   function home(instant) {
+    if (cssW() < 60 || cssH() < 60) { needHome = true; return; }
     let b = null;
     if (valley) {
       for (const st of valley.streams) { const q = st.bbox; b = b ? [Math.min(b[0], q[0]), Math.min(b[1], q[1]), Math.max(b[2], q[2]), Math.max(b[3], q[3])] : q.slice(); }
@@ -4649,10 +4654,13 @@ RS.app = (() => {
     if (H > RS.sim.frontier) RS.sim.advanceAll(H);
     RS.rain.tick(V, RS.clock.beat());
   }
+  let lastCW = 0, lastCH = 0;
   function frame() {
     const t = performance.now() / 1000;
     const dt = U.clamp(t - lastFrame, 0, 0.1);
     lastFrame = t;
+    const cv = document.getElementById('gl');
+    if (cv.clientWidth !== lastCW || cv.clientHeight !== lastCH) { lastCW = cv.clientWidth; lastCH = cv.clientHeight; resized = true; }
     if (resized) { RS.render.resize(); RS.ui.resize(); resized = false; }
     tick();
     RS.render.updateCamera(dt);
