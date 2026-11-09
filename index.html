@@ -57,6 +57,9 @@ body { font-family: Georgia, 'Times New Roman', serif; color: #3c3326; -webkit-u
 #atlas .meta { font-size: 12.5px; color: #8a7a62; padding: 0 3px; }
 #atlas .btns { display: flex; gap: 8px; margin-top: 9px; }
 #atlas .btns button { font-size: 12.5px; padding: 4px 11px; }
+#atlas .btns button.armed { background: #c9573a; color: #fff8ef; border-color: #a5432b; }
+#atlas .linkbox { margin-top: 16px; display: flex; gap: 10px; align-items: center; font-size: 14px; font-style: italic; color: #6a5536; }
+#atlas .linkbox input { flex: 1; font: 13px Georgia, serif; padding: 6px 9px; border: 1px solid rgba(110, 85, 50, 0.35); border-radius: 6px; background: #fffaf0; color: #3c3326; }
 
 </style>
 </head>
@@ -252,7 +255,7 @@ RS.i18n = (() => {
       copied: 'Link copied',
       copyFail: 'Copy this link:',
       del: 'Delete',
-      confirmDel: 'Delete this valley for good?',
+      confirmDel: 'Sure? Delete',
       back: 'Back to the valley',
       rename: 'Click the name to rename',
       imported: 'A shared valley joined your atlas',
@@ -312,7 +315,7 @@ RS.i18n = (() => {
       copied: 'Bağlantı kopyalandı',
       copyFail: 'Bu bağlantıyı kopyala:',
       del: 'Sil',
-      confirmDel: 'Bu vadi tamamen silinsin mi?',
+      confirmDel: 'Emin misin? Sil',
       back: 'Vadiye dön',
       rename: 'Adını değiştirmek için ada tıkla',
       imported: 'Paylaşılan bir vadi atlasına eklendi',
@@ -4086,7 +4089,9 @@ RS.store = (() => {
     const json = JSON.stringify(data);
     const z = await deflate(json);
     const code = z ? z.fmt + RS.util.bytesToB64url(z.bytes) : 'j' + RS.util.bytesToB64url(new TextEncoder().encode(json));
-    return location.href.split('#')[0] + '#v=' + code;
+    const here = location.href.split('#')[0];
+    const base = /^https?:/.test(location.protocol) && /github\.io$/.test(location.hostname) ? here : 'https://erenciracioglu-dotcom.github.io/Riversong/';
+    return base + '#v=' + code;
   }
   async function fromHash() {
     const m = /[#&]v=([A-Za-z0-9_-]+)/.exec(location.hash || '');
@@ -4156,7 +4161,12 @@ RS.atlas = (() => {
     else if (act === 'new') { RS.app.newValley(); close(); }
     else if (act === 'open' && id) { if (!RS.app.valley || id !== RS.app.valley.id) RS.app.openById(id); close(); }
     else if (act === 'del' && id) {
-      if (!confirm(T.confirmDel)) return;
+      const btn = e.target.closest('[data-act]');
+      if (!btn.classList.contains('armed')) {
+        btn.classList.add('armed'); btn.textContent = T.confirmDel;
+        setTimeout(() => { if (btn.isConnected) { btn.classList.remove('armed'); btn.textContent = T.del; } }, 4000);
+        return;
+      }
       const wasCur = RS.app.valley && id === RS.app.valley.id;
       RS.store.remove(id);
       if (wasCur) { const rest = RS.store.index(); if (rest.length) RS.app.openById(rest[0].id, true); else RS.app.newValley(true); }
@@ -4167,8 +4177,22 @@ RS.atlas = (() => {
       const lan = v === RS.app.valley ? RS.app.lanternSnapshot() : (v.lanterns || []);
       const url = await RS.store.shareURL(v, lan);
       try { await navigator.clipboard.writeText(url); RS.ui.showToast(T.copied); }
-      catch (err) { prompt(T.copyFail, url); }
+      catch (err) { showLink(url); }
     }
+  }
+  // where the clipboard is refused: show the link to copy by hand
+  function showLink(url) {
+    const T = RS.i18n.t();
+    const inner = document.querySelector('#atlas .atlas-inner');
+    if (!inner) return;
+    let box = inner.querySelector('.linkbox');
+    if (!box) { box = document.createElement('div'); box.className = 'linkbox'; inner.insertBefore(box, inner.children[1]); }
+    box.innerHTML = '<span></span><input readonly>';
+    box.querySelector('span').textContent = T.copyFail;
+    const inp = box.querySelector('input');
+    inp.value = url;
+    inp.addEventListener('focus', () => inp.select());
+    inp.focus();
   }
   return { open, close, render };
 })();
